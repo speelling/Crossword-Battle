@@ -4,14 +4,18 @@ import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHt
 import express from "express";
 import http from "http";
 import cors from "cors";
-import { PrismaClient } from "@prisma/client";
+import session from "express-session";
+import connectRedis from "connect-redis";
 import Redis, { Redis as RedisType } from "ioredis";
+import { PrismaClient } from "@prisma/client";
 
 import { HelloWorldResolver } from "./resolvers/UserResolver";
 import userTypeDefs from "./schema/userTypeDefs";
+import RedisStore from "connect-redis";
 
 const prisma = new PrismaClient();
 const redis = new Redis();
+
 
 const typeDefs = [userTypeDefs];
 
@@ -28,11 +32,36 @@ export interface MyContext {
   token?: string;
   prisma: PrismaClient;
   redis: RedisType;
+  req: express.Request;
+  res: express.Response;
 }
 
 async function startApolloServer() {
   const app = express();
   const httpServer = http.createServer(app);
+
+  app.use(
+    cors({
+      origin: "http://localhost:3000", 
+      credentials: true, 
+    })
+  );
+
+  app.use(
+    session({
+      name: "COOKIE_NAME", 
+      store: new RedisStore({ client: redis, disableTouch: true }), 
+      cookie: {
+        maxAge: 1000 * 60 * 60 * 24 * 365 * 10, 
+        httpOnly: true, 
+        sameSite: "lax", 
+        secure: false, 
+      },
+      saveUninitialized: false, 
+      secret: "your-secret-key", 
+      resave: false, 
+    })
+  );
 
   const server = new ApolloServer<MyContext>({
     typeDefs,
@@ -44,10 +73,11 @@ async function startApolloServer() {
 
   app.use(
     "/graphql",
-    cors<cors.CorsRequest>(),
     express.json(),
     expressMiddleware(server, {
-      context: async ({ req }) => ({
+      context: async ({ req, res }) => ({
+        req,
+        res,
         token: req.headers.token as string,
         prisma,
         redis,
