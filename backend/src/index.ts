@@ -12,6 +12,8 @@ import { PrismaClient } from "@prisma/client";
 import { HelloWorldResolver } from "./resolvers/UserResolver";
 import userTypeDefs from "./schema/userTypeDefs";
 import RedisStore from "connect-redis";
+import 'dotenv/config';
+
 
 const prisma = new PrismaClient();
 const redis = new Redis();
@@ -29,7 +31,6 @@ const resolvers = {
 };
 
 export interface MyContext {
-  token?: string;
   prisma: PrismaClient;
   redis: RedisType;
   req: express.Request;
@@ -49,19 +50,20 @@ async function startApolloServer() {
 
   app.use(
     session({
-      name: "COOKIE_NAME", 
-      store: new RedisStore({ client: redis, disableTouch: true }), 
+      name: process.env.COOKIE_NAME,
+      store: new RedisStore({ client: redis, disableTouch: true }),
       cookie: {
-        maxAge: 1000 * 60 * 60 * 24 * 365 * 10, 
-        httpOnly: true, 
-        sameSite: "lax", 
-        secure: false, 
+        maxAge: 1000 * 60 * 60 * 24 * 365 * 10,
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.COOKIE_SECURE === "true",
       },
-      saveUninitialized: false, 
-      secret: "your-secret-key", 
-      resave: false, 
+      saveUninitialized: false,
+      secret: process.env.COOKIE_SECRET || (() => { throw new Error('No Secret'); })(),
+      resave: false,
     })
   );
+  
 
   const server = new ApolloServer<MyContext>({
     typeDefs,
@@ -78,7 +80,6 @@ async function startApolloServer() {
       context: async ({ req, res }) => ({
         req,
         res,
-        token: req.headers.token as string,
         prisma,
         redis,
       }),
