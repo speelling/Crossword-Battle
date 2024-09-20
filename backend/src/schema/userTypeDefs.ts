@@ -1,10 +1,18 @@
 const userTypeDefs = `#graphql
   type Query {
     getRedisValue(key: String!): String
+    me: User
   }
 
   type Mutation {
     Register(args: UsernamePasswordInput!): RegisterResponse!
+    Login(args: LoginInput!): RegisterResponse!
+    Logout: Boolean
+  }
+
+  input LoginInput {
+    email: String!
+    password: String!
   }
 
   input UsernamePasswordInput {
