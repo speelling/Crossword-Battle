@@ -1,13 +1,16 @@
-import './App.css'
 
-function App() {
+
+
+const App: React.FC = () => {
+
+
   
 
   return (
-    <>
-      <h1>HELLO</h1>
-    </>
-  )
-}
+    <div>
+      hello
+    </div>
+  );
+};
 
-export default App
+export default App;
