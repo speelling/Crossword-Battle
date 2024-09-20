@@ -8,7 +8,25 @@ datasource db {
 }
 
 model User {
-  id    Int    @id @default(autoincrement())
-  name  String
-  email String @unique
+  id          String   @id @default(uuid())          
+  username    String   @unique                      
+  email       String   @unique                       
+  password    String                                
+  createdAt   DateTime @default(now())               
+  updatedAt   DateTime @updatedAt                   
+  games       Game[]    @relation("UserGames")
+  
+  @@index([username])                               
+  @@index([email])                                  
+}
+
+model Game {
+  id          String   @id @default(uuid())          
+  gameState   Json                                  
+  status      String                                
+  createdAt   DateTime @default(now())               
+  updatedAt   DateTime @updatedAt                   
+  users       User[]    @relation("UserGames")       
+
+  @@index([status])
 }

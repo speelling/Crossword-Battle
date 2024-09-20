@@ -1,27 +1,25 @@
 import { MyContext } from "..";
+import { UsernamePasswordInput } from "../types/UserTypes";
+import argon2 from "argon2";
 
-export const HelloWorldResolver = {
+
+export const UserResolver = {
   Query: {
-    getRedisValue: async (_parent: any, args: { key: string }, context: MyContext) => {
-      try {
-        const value = await context.redis.get(args.key);
-        return value;
-      } catch (error) {
-        console.error("Error fetching from Redis:", error);
-        throw new Error("Failed to get value from Redis");
-      }
-    },
   },
   Mutation: {
-    setRedisValue: async (_parent: any, args: { key: string, value: string }, context: MyContext) => {
-      try {
-        await context.redis.set(args.key, args.value);
-        return `Key ${args.key} set successfully with value ${args.value}`; 
-      } catch (error) {
-        console.error("Error setting Redis value:", error);
-        throw new Error("Failed to set value in Redis");
-      }
+    Register: async (_parent: any, { args }: { args: UsernamePasswordInput } , context: MyContext) => {
+        console.log(args);      
+        const hashedPassword = await argon2.hash(args.password);
+        const user = await context.prisma.user.create({
+          data: {
+            username: args.username,
+            email: args.email,
+            password: hashedPassword,
+          },
+        });
+        context.req.session.userId = user.id;
+        return { user };
+      } 
     },
-  },
 };
 

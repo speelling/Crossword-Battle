@@ -6,9 +6,9 @@
       "esModuleInterop": true,                    
       "skipLibCheck": true,
       "forceConsistentCasingInFileNames": true,
-      "emitDecoratorMetadata": true,           // Required for TypeORM
+      "emitDecoratorMetadata": true,           
       "experimentalDecorators": true,
-      "strictPropertyInitialization": false,        // Required for TypeORM
+      "strictPropertyInitialization": false,        
       "outDir": "./dist",   
       "rootDir": "./src"    
     },

@@ -9,7 +9,7 @@ import connectRedis from "connect-redis";
 import Redis, { Redis as RedisType } from "ioredis";
 import { PrismaClient } from "@prisma/client";
 
-import { HelloWorldResolver } from "./resolvers/UserResolver";
+import { UserResolver } from "./resolvers/UserResolver";
 import userTypeDefs from "./schema/userTypeDefs";
 import RedisStore from "connect-redis";
 import 'dotenv/config';
@@ -19,21 +19,27 @@ const prisma = new PrismaClient();
 const redis = new Redis();
 
 
+declare module "express-session" {
+  interface SessionData {
+    userId: string;
+  }
+}
+
 const typeDefs = [userTypeDefs];
 
 const resolvers = {
   Query: {
-    ...HelloWorldResolver.Query,
+    ...UserResolver.Query,
   },
   Mutation: {
-    ...HelloWorldResolver.Mutation,
+    ...UserResolver.Mutation,
   },
 };
 
 export interface MyContext {
   prisma: PrismaClient;
   redis: RedisType;
-  req: express.Request;
+  req: express.Request & { session: session.Session & Partial<session.SessionData> };
   res: express.Response;
 }
 
@@ -43,7 +49,7 @@ async function startApolloServer() {
 
   app.use(
     cors({
-      origin: "http://localhost:3000", 
+      origin: "*", 
       credentials: true, 
     })
   );
