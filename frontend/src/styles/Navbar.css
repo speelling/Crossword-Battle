@@ -1,0 +1,31 @@
+.navbar {
+    width: 100%;
+    background-color: #333;
+    padding: 10px;
+}
+
+.navbar-content {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin: 0 auto;
+}
+
+.navbar h1 {
+    color: white;
+    margin: 0;
+}
+
+.navbar-buttons .navbar-btn {
+    background-color: #f0f0f0;
+    border: none;
+    padding: 10px 20px;
+    margin-left: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 5px;
+}
+
+.navbar-buttons .navbar-btn:hover {
+    background-color: #ddd;
+}
