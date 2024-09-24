@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { useMutation, useQuery } from "@apollo/client";
 import { REGISTER_MUTATION } from "../graphql/mutations";
 import { ME_QUERY } from "../graphql/queries";
+import { useNavigate } from "react-router-dom";
 
 const Register: React.FC = () => {
+  const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -27,6 +29,7 @@ const Register: React.FC = () => {
       setErrors(response.data.Register.errors);
     } else if (response.data.Register.user) {
       console.log("User registered:", response.data.Register.user);
+      navigate("/");
     }
   };
 

@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useMutation } from '@apollo/client';
 import { LOGIN_MUTATION } from '../graphql/mutations';
-
+import { useNavigate } from 'react-router-dom';
 
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
+  const navigate = useNavigate();
+
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<{ field: string, message: string }[] | null>(null);
   const [login] = useMutation(LOGIN_MUTATION);
@@ -19,10 +21,14 @@ const Login: React.FC = () => {
       }
     });
 
+    console.log(response);
+
     if (response.data.Login.errors) {
       setErrors(response.data.Login.errors);
     } else if (response.data.Login.user) {
-      console.log('User logged in:', response.data.Login.user);}
+      console.log('User logged in:', response.data.Login.user)
+      navigate('/');;}
+      
   };
 
   return (

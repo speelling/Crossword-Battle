@@ -1,20 +1,29 @@
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
-import './index.css';
-import { ApolloClient, InMemoryCache, ApolloProvider } from '@apollo/client';
-import Register from './pages/Register';
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import "./styles/index.css";
+import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
+import Register from "./pages/Register";
+import Login from "./pages/Login";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import App from "./App";
 
 const client = new ApolloClient({
-  uri: 'http://localhost:4000/graphql',
+  uri: "http://localhost:4000/graphql",
   cache: new InMemoryCache(),
-  credentials: 'include',
+  credentials: "include",
 });
 
-
-createRoot(document.getElementById('root')!).render(
+createRoot(document.getElementById("root")!).render(
   <ApolloProvider client={client}>
-  <StrictMode>
-    <Register/>
-  </StrictMode>
+    <StrictMode>
+      <Router>
+        <Routes>
+          <Route path="/" element={<App />} />
+
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+        </Routes>
+      </Router>
+    </StrictMode>
   </ApolloProvider>
 );
