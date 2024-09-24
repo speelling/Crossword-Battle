@@ -17,7 +17,7 @@ export const REGISTER_MUTATION = gql`
 `;
 
 export const LOGIN_MUTATION = gql`
-  mutation Login($args: UsernamePasswordInput!) {
+  mutation Login($args: LoginInput!) {
     Login(args: $args) {
       errors {
         field
@@ -31,3 +31,9 @@ export const LOGIN_MUTATION = gql`
     }
   }
 `;
+
+export const LOGOUT_MUTATION = gql`
+  mutation Logout {
+    Logout
+  }
+`;  
