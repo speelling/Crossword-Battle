@@ -13,6 +13,7 @@ import { UserResolver } from "./resolvers/UserResolver";
 import userTypeDefs from "./schema/userTypeDefs";
 import RedisStore from "connect-redis";
 import 'dotenv/config';
+import { Server } from 'socket.io';
 
 
 const prisma = new PrismaClient();
@@ -46,6 +47,22 @@ export interface MyContext {
 async function startApolloServer() {
   const app = express();
   const httpServer = http.createServer(app);
+
+  const io = new Server(httpServer, {
+    cors: {
+      origin: "http://localhost:5173", 
+      credentials: true,
+    }
+  });
+
+  io.on('connection', (socket) => {
+    console.log('A user connected:', socket.id);
+
+    socket.on('disconnect', () => {
+      console.log('User disconnected:', socket.id);
+    });
+
+  });
 
   app.use(
     cors({
