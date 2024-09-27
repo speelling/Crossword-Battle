@@ -8,17 +8,16 @@ import session from "express-session";
 import connectRedis from "connect-redis";
 import Redis, { Redis as RedisType } from "ioredis";
 import { PrismaClient } from "@prisma/client";
-
 import { UserResolver } from "./resolvers/UserResolver";
 import userTypeDefs from "./schema/userTypeDefs";
 import RedisStore from "connect-redis";
-import 'dotenv/config';
-import { Server } from 'socket.io';
-
+import "dotenv/config";
+import { GameResolver } from "./resolvers/GameResolver";
+import gameTypeDefs from "./schema/gameTypeDefs";
+import { setupSocketIO } from "./utils/socket";
 
 const prisma = new PrismaClient();
 const redis = new Redis();
-
 
 declare module "express-session" {
   interface SessionData {
@@ -26,7 +25,7 @@ declare module "express-session" {
   }
 }
 
-const typeDefs = [userTypeDefs];
+const typeDefs = [userTypeDefs, gameTypeDefs];
 
 const resolvers = {
   Query: {
@@ -34,13 +33,16 @@ const resolvers = {
   },
   Mutation: {
     ...UserResolver.Mutation,
+    ...GameResolver.Mutation,
   },
 };
 
 export interface MyContext {
   prisma: PrismaClient;
   redis: RedisType;
-  req: express.Request & { session: session.Session & Partial<session.SessionData> };
+  req: express.Request & {
+    session: session.Session & Partial<session.SessionData>;
+  };
   res: express.Response;
 }
 
@@ -48,26 +50,12 @@ async function startApolloServer() {
   const app = express();
   const httpServer = http.createServer(app);
 
-  const io = new Server(httpServer, {
-    cors: {
-      origin: "http://localhost:5173", 
-      credentials: true,
-    }
-  });
-
-  io.on('connection', (socket) => {
-    console.log('A user connected:', socket.id);
-
-    socket.on('disconnect', () => {
-      console.log('User disconnected:', socket.id);
-    });
-
-  });
+  setupSocketIO(httpServer, redis);
 
   app.use(
     cors({
-      origin: "http://localhost:5173", 
-      credentials: true, 
+      origin: "http://localhost:5173",
+      credentials: true,
     })
   );
 
@@ -82,11 +70,14 @@ async function startApolloServer() {
         secure: process.env.COOKIE_SECURE === "true",
       },
       saveUninitialized: false,
-      secret: process.env.COOKIE_SECRET || (() => { throw new Error('No Secret'); })(),
+      secret:
+        process.env.COOKIE_SECRET ||
+        (() => {
+          throw new Error("No Secret");
+        })(),
       resave: false,
     })
   );
-  
 
   const server = new ApolloServer<MyContext>({
     typeDefs,
