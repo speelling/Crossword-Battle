@@ -3,7 +3,7 @@ import { useMutation, useQuery } from "@apollo/client";
 import { REGISTER_MUTATION } from "../graphql/mutations";
 import { ME_QUERY } from "../graphql/queries";
 import { useNavigate } from "react-router-dom";
-
+import "../styles/Register.css"
 const Register: React.FC = () => {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
@@ -12,7 +12,7 @@ const Register: React.FC = () => {
   const [errors, setErrors] = useState<{ field: string; message: string }[] | null>(null);
   const [register] = useMutation(REGISTER_MUTATION);
 
-  const { data:me } = useQuery(ME_QUERY);
+  const { data: me } = useQuery(ME_QUERY);
 
   console.log(me);
 
@@ -34,7 +34,7 @@ const Register: React.FC = () => {
   };
 
   return (
-    <div>
+    <div className="register-container">
       <h1>Register</h1>
       <form onSubmit={handleSubmit}>
         <input
@@ -58,7 +58,7 @@ const Register: React.FC = () => {
         <button type="submit">Register</button>
       </form>
       {errors && (
-        <div>
+        <div className="error-messages">
           {errors.map((error, index) => (
             <p key={index}>
               {error.field}: {error.message}
