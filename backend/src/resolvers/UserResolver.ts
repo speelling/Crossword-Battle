@@ -19,6 +19,7 @@ export const UserResolver = {
   },
   Mutation: {
     Register: async (_parent: any, { args }: { args: UsernamePasswordInput }, context: MyContext) => {
+      console.log(context)
       const errors = validateRegister(args);
       if (errors) {
         return { errors }; 

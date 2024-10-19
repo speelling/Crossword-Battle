@@ -12,9 +12,10 @@ import { UserResolver } from "./resolvers/UserResolver";
 import userTypeDefs from "./schema/userTypeDefs";
 import RedisStore from "connect-redis";
 import "dotenv/config";
-import { GameResolver } from "./resolvers/GameResolver";
+import { GameResolver} from "./resolvers/GameResolver";
 import gameTypeDefs from "./schema/gameTypeDefs";
-import { setupSocketIO } from "./utils/socket";
+import { setupSocketIO } from "./utils/socketSetup";
+
 
 const prisma = new PrismaClient();
 const redis = new Redis();
@@ -46,11 +47,36 @@ export interface MyContext {
   res: express.Response;
 }
 
+const context: MyContext = {
+  prisma,
+  redis,
+  req: {} as any, // Will be populated dynamically in each request
+  res: {} as any, // Will be populated dynamically in each request
+};
+
+export const sessionMiddleware = session({
+  name: process.env.COOKIE_NAME,
+  store: new RedisStore({ client: redis, disableTouch: true }),
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 24 * 365 * 10,
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.COOKIE_SECURE === "true",
+  },
+  saveUninitialized: false,
+  secret:
+    process.env.COOKIE_SECRET ||
+    (() => {
+      throw new Error("No Secret");
+    })(),
+  resave: false,
+})
+
 async function startApolloServer() {
   const app = express();
   const httpServer = http.createServer(app);
 
-  setupSocketIO(httpServer, redis);
+  setupSocketIO(httpServer, sessionMiddleware,context);
 
   app.use(
     cors({
@@ -59,24 +85,11 @@ async function startApolloServer() {
     })
   );
 
+   
+
   app.use(
-    session({
-      name: process.env.COOKIE_NAME,
-      store: new RedisStore({ client: redis, disableTouch: true }),
-      cookie: {
-        maxAge: 1000 * 60 * 60 * 24 * 365 * 10,
-        httpOnly: true,
-        sameSite: "lax",
-        secure: process.env.COOKIE_SECURE === "true",
-      },
-      saveUninitialized: false,
-      secret:
-        process.env.COOKIE_SECRET ||
-        (() => {
-          throw new Error("No Secret");
-        })(),
-      resave: false,
-    })
+    sessionMiddleware
+    
   );
 
   const server = new ApolloServer<MyContext>({
