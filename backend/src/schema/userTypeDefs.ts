@@ -1,6 +1,5 @@
 const userTypeDefs = `#graphql
   type Query {
-    getRedisValue(key: String!): String
     me: User
   }
 
