@@ -32,7 +32,7 @@ const Navbar: React.FC = () => {
         <div className="navbar-buttons">
           {user ? (
             <div style={{ display: 'flex', alignItems: 'center' }}>
-              <p style={{ color: "white", marginRight: '10px' }}>Welcome, {user.username}!</p>
+              <p style={{ color: "black", marginRight: '10px' }}>Welcome, {user.username}!</p>
               <button className="navbar-btn" onClick={handleLogout}>Logout</button>
             </div>
           ) : (
