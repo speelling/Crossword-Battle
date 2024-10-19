@@ -1,5 +1,6 @@
 import { gql } from "@apollo/client";
 
+// USER
 export const REGISTER_MUTATION = gql`
   mutation Register($args: UsernamePasswordInput!) {
     Register(args: $args) {
@@ -37,3 +38,11 @@ export const LOGOUT_MUTATION = gql`
     Logout
   }
 `;  
+
+// GAME 
+
+export const CREATE_GAME = gql`
+  mutation CreateGame {
+  createGame 
+}
+`;
