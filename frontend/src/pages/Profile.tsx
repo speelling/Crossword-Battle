@@ -1,25 +1,8 @@
 import React from 'react';
-import { useQuery, gql } from '@apollo/client';
+import { useQuery } from '@apollo/client';
+import { PROFILE_QUERY } from '../graphql/queries';
 
-// Define the profile query
-const PROFILE_QUERY = gql`
-  query Profile {
-  profile {
-    games {
-      createdAt
-      gameState
-      id
-      status
-      updatedAt
-      winner {
-        username
-        id
-      }
-    }
-    username
-  }
-}
-`;
+
 
 const Profile: React.FC = () => {  
   

@@ -1,20 +1,19 @@
 import React, { useState } from "react";
-import { useMutation, useQuery } from "@apollo/client";
+import { useMutation } from "@apollo/client";
 import { REGISTER_MUTATION } from "../graphql/mutations";
 import { ME_QUERY } from "../graphql/queries";
 import { useNavigate } from "react-router-dom";
-import "../styles/Register.css"
+import "../styles/Register.css";
+
 const Register: React.FC = () => {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<{ field: string; message: string }[] | null>(null);
-  const [register] = useMutation(REGISTER_MUTATION);
-
-  const { data: me } = useQuery(ME_QUERY);
-
-  console.log(me);
+  const [register] = useMutation(REGISTER_MUTATION, {
+    refetchQueries: [{ query: ME_QUERY }], 
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

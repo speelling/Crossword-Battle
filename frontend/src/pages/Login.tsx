@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useMutation } from '@apollo/client';
 import { LOGIN_MUTATION } from '../graphql/mutations';
+import { ME_QUERY } from '../graphql/queries'; 
 import { useNavigate } from 'react-router-dom';
 import "../styles/Login.css"
 
@@ -9,7 +10,9 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState<{ field: string, message: string }[] | null>(null);
-  const [login] = useMutation(LOGIN_MUTATION);
+  const [login] = useMutation(LOGIN_MUTATION, {
+    refetchQueries: [{ query: ME_QUERY }], 
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,8 +22,6 @@ const Login: React.FC = () => {
         args: { email, password }
       }
     });
-
-    console.log(response);
 
     if (response.data.Login.errors) {
       setErrors(response.data.Login.errors);

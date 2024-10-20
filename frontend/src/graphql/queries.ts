@@ -1,5 +1,8 @@
 import { gql } from "@apollo/client";
 
+
+
+
 export const ME_QUERY = gql`
   query Me {
     me {
@@ -8,4 +11,24 @@ export const ME_QUERY = gql`
       email
     }
   }
+`;
+
+
+export const PROFILE_QUERY = gql`
+  query Profile {
+  profile {
+    games {
+      createdAt
+      gameState
+      id
+      status
+      updatedAt
+      winner {
+        username
+        id
+      }
+    }
+    username
+  }
+}
 `;

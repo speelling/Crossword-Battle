@@ -27,7 +27,7 @@ model Game {
   status      String                                
   createdAt   DateTime @default(now())               
   updatedAt   DateTime @updatedAt                   
-  users       User[]   @relation("UserGames")        // Users playing the game
+  users       User[]   @relation("UserGames")        
   finishedStates FinishedState[] @relation("GameFinishedStates")
   winner      User?     @relation(fields: [winnerId], references: [id], name: "Game_winner")
   winnerId    String?   
@@ -37,10 +37,10 @@ model Game {
 
 model FinishedState {
   id          String   @id @default(uuid())
-  userId      String   // Stores the ID of the user who finished the game
+  userId      String   
   game        Game     @relation("GameFinishedStates", fields: [gameId], references: [id])
   gameId      String
-  state       Json     // Finished game state for this user
+  state       Json    
   createdAt   DateTime @default(now())
 
   @@index([userId])

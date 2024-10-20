@@ -35,3 +35,13 @@
     border: none;
     background: none;
 }
+
+
+.profile-btn {
+    background-color: #ffffff;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    color: rgb(0, 0, 0);
+    text-decoration: underline;
+}
