@@ -1,18 +1,21 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { io, Socket } from 'socket.io-client';
 import Crossword from '../components/Crossword';
 import Navbar from '../components/Navbar';
 import { ClientToServerEvents, Move, ServerToClientEvents } from '../utils/types';
 import "../styles/Game.css"
+
 const SOCKET_SERVER_URL = 'http://localhost:4000';
 
 const Game: React.FC = () => {
   const { gameId } = useParams<{ gameId: string }>();
   const [crosswordData, setCrosswordData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [gameStatus, setGameStatus] = useState<'waiting' | 'ongoing' | 'ended'>('waiting');  // Game status state
+  const [gameStatus, setGameStatus] = useState<'waiting' | 'ongoing' | 'ended'>('waiting');  
   const socketRef = useRef<Socket<ServerToClientEvents, ClientToServerEvents> | null>(null);
+  const navigate = useNavigate();     
+
 
   useEffect(() => {
     const socket = io(SOCKET_SERVER_URL, {
@@ -24,18 +27,23 @@ const Game: React.FC = () => {
 
     socket.on('gameState', (gameState: any) => {
       setCrosswordData(gameState);
-      setGameStatus(gameState.status);  // Set game status from the game state
+      setGameStatus(gameState.status);  
       setLoading(false);
     });
 
     socket.on('gameStarted', () => {
-      setGameStatus('ongoing');  // Update status to ongoing
+      setGameStatus('ongoing'); 
       console.log('The game has started');
     });
 
     socket.on('gameEnded', (data: { gameId: string; winner: string }) => {
-      setGameStatus('ended');  // Update status to ended
+      setGameStatus('ended');  
       alert(`Game ended! Winner: ${data.winner}`);
+    });
+
+    socket.on('gameExpired', (data: { gameId: string; message: string }) => {
+      alert(data.message);
+      navigate('/');
     });
 
     socket.on('error', (data: { message: string }) => {
@@ -47,7 +55,7 @@ const Game: React.FC = () => {
     return () => {
       socket.disconnect(); 
     };
-  }, [gameId]);
+  }, [gameId, navigate]);
 
   const handleMove = (x: number, y: number, value: string) => {
     if (socketRef.current && gameId) {
