@@ -3,6 +3,7 @@ import { useMutation } from '@apollo/client';
 import { useNavigate } from 'react-router-dom'; 
 import { CREATE_GAME } from './graphql/mutations';
 import Navbar from './components/Navbar';
+import './styles/App.css';
 
 const App: React.FC = () => {
   const [gameId, setGameId] = useState<string>('');
@@ -28,24 +29,29 @@ const App: React.FC = () => {
   };
 
   return (
-    <div>
+    <>
       <Navbar/>
-      <h1>Welcome to Crossword Battle!</h1>
-      <button onClick={handleCreateGame} disabled={creating}>
-        {creating ? 'Creating...' : 'Create New Game'}
-      </button>
+      <div className="app-container">
+        <div className="content-box">
+          <h1>Welcome to Crossword Battle!</h1>
+          <button className="btn" onClick={handleCreateGame} disabled={creating}>
+            {creating ? 'Creating...' : 'Create New Game'}
+          </button>
 
-      <div>
-        <h2>Join Game</h2>
-        <input
-          type="text"
-          value={gameId}
-          onChange={(e) => setGameId(e.target.value)}
-          placeholder="Enter Game ID"
-        />
-        <button onClick={handleJoinGame}>Join Game</button>
+          <div className="join-section">
+            <h2>Join Game</h2>
+            <input
+              type="text"
+              value={gameId}
+              onChange={(e) => setGameId(e.target.value)}
+              placeholder="Enter Game ID"
+              className="input-field"
+            />
+            <button className="btn" onClick={handleJoinGame}>Join Game</button>
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
