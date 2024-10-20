@@ -14,8 +14,9 @@ model User {
   password    String                                
   createdAt   DateTime @default(now())               
   updatedAt   DateTime @updatedAt                   
-  games       Game[]    @relation("UserGames")
-  
+  games       Game[]   @relation("UserGames")
+  gamesWon    Game[]   @relation("Game_winner") 
+
   @@index([username])                               
   @@index([email])                                  
 }
@@ -26,7 +27,22 @@ model Game {
   status      String                                
   createdAt   DateTime @default(now())               
   updatedAt   DateTime @updatedAt                   
-  users       User[]    @relation("UserGames")       
+  users       User[]   @relation("UserGames")        // Users playing the game
+  finishedStates FinishedState[] @relation("GameFinishedStates")
+  winner      User?     @relation(fields: [winnerId], references: [id], name: "Game_winner")
+  winnerId    String?   
 
   @@index([status])
+}
+
+model FinishedState {
+  id          String   @id @default(uuid())
+  userId      String   // Stores the ID of the user who finished the game
+  game        Game     @relation("GameFinishedStates", fields: [gameId], references: [id])
+  gameId      String
+  state       Json     // Finished game state for this user
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([gameId])
 }
