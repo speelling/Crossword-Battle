@@ -4,17 +4,14 @@ import { io, Socket } from 'socket.io-client';
 import Crossword from '../components/Crossword';
 import Navbar from '../components/Navbar';
 import { ClientToServerEvents, Move, ServerToClientEvents } from '../utils/types';
-
-
-
-
-
+import "../styles/Game.css"
 const SOCKET_SERVER_URL = 'http://localhost:4000';
 
 const Game: React.FC = () => {
   const { gameId } = useParams<{ gameId: string }>();
   const [crosswordData, setCrosswordData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [gameStatus, setGameStatus] = useState<'waiting' | 'ongoing' | 'ended'>('waiting');  // Game status state
   const socketRef = useRef<Socket<ServerToClientEvents, ClientToServerEvents> | null>(null);
 
   useEffect(() => {
@@ -27,14 +24,17 @@ const Game: React.FC = () => {
 
     socket.on('gameState', (gameState: any) => {
       setCrosswordData(gameState);
+      setGameStatus(gameState.status);  // Set game status from the game state
       setLoading(false);
     });
 
     socket.on('gameStarted', () => {
+      setGameStatus('ongoing');  // Update status to ongoing
       console.log('The game has started');
     });
 
     socket.on('gameEnded', (data: { gameId: string; winner: string }) => {
+      setGameStatus('ended');  // Update status to ended
       alert(`Game ended! Winner: ${data.winner}`);
     });
 
@@ -63,13 +63,16 @@ const Game: React.FC = () => {
         {loading ? (
           <div>Loading game...</div>
         ) : (
-          <Crossword
-            puzzle={crosswordData.puzzle}
-            clues={crosswordData.clues}
-            dim={crosswordData.dim}
-            onMove={handleMove}
-          />
+          <div className={gameStatus === 'waiting' ? 'blurred' : ''}>
+            <Crossword
+              puzzle={crosswordData.puzzle}
+              clues={crosswordData.clues}
+              dim={crosswordData.dim}
+              onMove={handleMove}
+            />
+          </div>
         )}
+        {gameStatus === 'waiting' && <div className="waiting-text">Waiting for another player...</div>}
       </div>
     </>
   );

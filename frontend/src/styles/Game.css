@@ -1,0 +1,12 @@
+.blurred {
+    filter: blur(5px);
+    pointer-events: none;
+  }
+  
+  .waiting-text {
+    text-align: center;
+    font-size: 1.5em;
+    color: gray;
+    margin-top: 20px;
+  }
+  
