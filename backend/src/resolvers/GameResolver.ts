@@ -20,20 +20,20 @@ export const GameResolver = {
         puzzle: fullCrossword.puzzle,
         clues: fullCrossword.clues,
         dim: fullCrossword.dim,
-        status: 'waiting', 
+        status: 'waiting',
         startTime: Date.now(),
-        players: [userId], 
-        playerStates: {}, 
+        players: [userId],
+        playerStates: {},
       };
 
-      await context.redis.set(`game:${gameId}`, JSON.stringify(initialState));
+      await context.redis.set(
+        `game:${gameId}`,
+        JSON.stringify(initialState),
+        'EX',
+        300 
+      );
 
-      return gameId
-        
+      return gameId;
     },
   },
 };
-
-
-
-

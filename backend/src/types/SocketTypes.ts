@@ -10,6 +10,7 @@ export interface ClientToServerEvents {
     gameState: (state: GameState) => void;
     gameStarted: (data: { gameId: string }) => void;
     gameEnded: (data: { gameId: string; winner: string }) => void;
+    gameExpired: (data: { gameId: string; message: string }) => void;
     updatePlayerState: (data: { gameId: string; puzzle: Cell[] }) => void;
     error: (data: { message: string }) => void;
   }

@@ -40,5 +40,6 @@ export interface ServerToClientEvents {
   gameState: (data: any) => void;
   gameStarted: () => void;
   gameEnded: (data: { gameId: string; winner: string }) => void;
+  gameExpired: (data: { gameId: string; message: string }) => void;
   error: (data: { message: string }) => void;
 }
