@@ -3,6 +3,41 @@ import { MyContext } from '..';
 import { generateCrossword } from '../utils/generateCrossword';
 
 export const GameResolver = {
+  Query: {
+    profile: async (_: any, args: any, context: MyContext) => {
+      const userId = context.req.session.userId;
+
+      console.log("userId is ",userId);
+
+      if (!userId) {
+        throw new Error("User not authenticated");
+      }
+
+
+      const user = await context.prisma.user.findUnique({
+        where: { id: userId },
+        include: {
+          games: {
+            include: {
+              winner: true,
+            },
+          },
+        },
+      });
+
+      console.log("user is ",user);
+
+      if (!user) {
+        throw new Error("User not found");
+      }
+
+      return {
+        username: user.username,
+        games: user.games,
+      };
+    },
+  },
+
   Mutation: {
     async createGame(_: any, args: any, context: MyContext) {
       const userId = context.req.session.userId;

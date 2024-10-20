@@ -163,6 +163,24 @@ export function setupSocketIO(
               winner: userId,
             });
 
+            await context.prisma.game.create({
+              data: {
+                id: gameId,
+                gameState: gameState,
+                status: gameState.status,
+                winnerId: userId,
+                users: {
+                  connect: gameState.players.map((playerId: string) => ({ id: playerId })),
+                },
+                finishedStates: {
+                  create: gameState.players.map((playerId: string) => ({
+                    userId: playerId,
+                    state: gameState.playerStates[playerId],
+                  })),
+                },
+              },
+            });
+
             await context.redis.del(gameKey);
           } else {
             socket.emit('updatePlayerState', {

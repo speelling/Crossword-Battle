@@ -21,6 +21,10 @@ const Navbar: React.FC = () => {
     }
   };
 
+  const handleProfileclick = () => { 
+    navigate('/profile');
+  }
+
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error! {error.message}</p>;
 
@@ -32,7 +36,7 @@ const Navbar: React.FC = () => {
         <div className="navbar-buttons">
           {user ? (
             <div style={{ display: 'flex', alignItems: 'center' }}>
-              <p style={{ color: "black", marginRight: '10px' }}>Welcome, {user.username}!</p>
+              <button  onClick={handleProfileclick}>Welcome, {user.username}!</button>
               <button className="navbar-btn" onClick={handleLogout}>Logout</button>
             </div>
           ) : (

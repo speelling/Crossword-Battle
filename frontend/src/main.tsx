@@ -7,6 +7,7 @@ import Login from "./pages/Login";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import App from "./App";
 import Game from "./pages/Game";
+import Profile from "./pages/Profile";
 
 const client = new ApolloClient({
   uri: "http://localhost:4000/graphql",
@@ -23,6 +24,7 @@ createRoot(document.getElementById("root")!).render(
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/game/:gameId" element={<Game />} />
+          <Route path="/profile" element={<Profile />} />
         </Routes>
       </Router>
     </StrictMode>

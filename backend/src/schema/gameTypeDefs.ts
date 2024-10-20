@@ -19,11 +19,10 @@ type Game {
   winner: User        
 }
 
-type User {
+type UserGame {
   id: ID!
   username: String!
   email: String!
-  games: [Game!]! 
 }
 
 

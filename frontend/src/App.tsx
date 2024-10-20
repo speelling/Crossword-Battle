@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useMutation } from '@apollo/client';
 import { useNavigate } from 'react-router-dom'; 
 import { CREATE_GAME } from './graphql/mutations';
@@ -6,7 +6,6 @@ import Navbar from './components/Navbar';
 import './styles/App.css';
 
 const App: React.FC = () => {
-  const [gameId, setGameId] = useState<string>('');
   const [createGame, { loading: creating }] = useMutation(CREATE_GAME); 
   const navigate = useNavigate();
 
@@ -20,13 +19,7 @@ const App: React.FC = () => {
     }
   };
 
-  const handleJoinGame = () => {
-    if (gameId) {
-      navigate(`/game/${gameId}`); 
-    } else {
-      alert('Please enter a valid Game ID');
-    }
-  };
+  
 
   return (
     <>
@@ -38,17 +31,7 @@ const App: React.FC = () => {
             {creating ? 'Creating...' : 'Create New Game'}
           </button>
 
-          <div className="join-section">
-            <h2>Join Game</h2>
-            <input
-              type="text"
-              value={gameId}
-              onChange={(e) => setGameId(e.target.value)}
-              placeholder="Enter Game ID"
-              className="input-field"
-            />
-            <button className="btn" onClick={handleJoinGame}>Join Game</button>
-          </div>
+          
         </div>
       </div>
     </>

@@ -31,6 +31,7 @@ const typeDefs = [userTypeDefs, gameTypeDefs];
 const resolvers = {
   Query: {
     ...UserResolver.Query,
+    ...GameResolver.Query
   },
   Mutation: {
     ...UserResolver.Mutation,
