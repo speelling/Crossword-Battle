@@ -9,6 +9,8 @@ const userTypeDefs = `#graphql
     Logout: Boolean
   }
 
+
+
   input LoginInput {
     email: String!
     password: String!
@@ -34,6 +36,7 @@ const userTypeDefs = `#graphql
     id: ID!
     username: String!
     email: String!
+    games: [Game!]!
   }
 `;
 
