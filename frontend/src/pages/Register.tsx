@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useMutation } from "@apollo/client";
+import React, { useEffect, useState } from "react";
+import { useMutation, useQuery } from "@apollo/client";
 import { REGISTER_MUTATION } from "../graphql/mutations";
 import { ME_QUERY } from "../graphql/queries";
 import { useNavigate, Link } from "react-router-dom"; // Import Link for navigation
@@ -14,6 +14,15 @@ const Register: React.FC = () => {
   const [register] = useMutation(REGISTER_MUTATION, {
     refetchQueries: [{ query: ME_QUERY }], 
   });
+
+  
+const { data } = useQuery(ME_QUERY);
+
+useEffect(() => {
+  if (data?.me) {
+    navigate('/');
+  }
+}, [data, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
