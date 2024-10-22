@@ -16,7 +16,7 @@
 
 .crossword-grid-container {
   display: grid;
-  grid-template-columns: 1fr 300px; 
+  grid-template-columns: 1fr 400px; 
   grid-gap: 20px;
   justify-items: center;
   align-items: start;
@@ -45,6 +45,21 @@
 
 .across li, .down li {
   padding: 4px 0;
+}
+
+.clue-text {
+  cursor: pointer;
+  color: black;
+  font-size: 1.2em;
+  font-weight: normal;
+  padding: 2px 0;
+  display: block;
+  border-bottom: 1px solid lightgray;
+  transition: color 0.3s ease;
+}
+
+.clue-text:hover {
+  color: darkblue;
 }
 
 .across h3, .down h3 {

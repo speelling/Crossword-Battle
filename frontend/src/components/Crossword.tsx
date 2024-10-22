@@ -107,9 +107,12 @@ const Crossword: React.FC<CrosswordProps> = ({ puzzle, clues, dim, onMove }) => 
       .filter((clue: any) => clue.direction === direction)
       .map((clue: any) => (
         <li key={clue.clueId}>
-          <button onClick={() => handleClueClick(clue.clueId, direction)}>
+          <span
+            className="clue-text"
+            onClick={() => handleClueClick(clue.clueId, direction)}
+          >
             {clue.clueId + 1} {clue.text}
-          </button>
+          </span>
         </li>
       ));
   };

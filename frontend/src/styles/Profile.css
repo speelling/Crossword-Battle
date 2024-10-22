@@ -1,37 +1,62 @@
 .profile-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    margin-top: 20px;
-  }
-  
-  .games-list {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 20px;
-    margin-top: 20px;
-  }
-  
-  .game-card {
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    padding: 15px;
-    width: 200px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s;
-  }
-  
-  .game-card:hover {
-    transform: scale(1.05);
-  }
-  
-  h1, h2, h3 {
-    margin: 10px 0;
-  }
-  
-  p {
-    margin: 5px 0;
-  }
-  
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.profile-header {
+  padding: 20px;
+  width: 100%;
+  max-width: 800px;
+  text-align: left;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.win-loss {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 15px;
+  gap: 20px;
+}
+
+.win-loss div {
+  background-color: #fff;
+  padding: 10px 15px;
+  border-radius: 6px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.games-section {
+  width: 80%;
+  max-width: 800px;
+}
+
+.games-title {
+  text-align: left;
+  margin-bottom: 10px;
+}
+
+.games-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.games-table th, .games-table td {
+  padding: 10px;
+  border: 1px solid #ddd;
+}
+
+.games-table th {
+  background-color: #f2f2f2;
+}
+
+.games-table tbody tr:hover {
+  background-color: #f9f9f9;
+}
+
+.games-table td {
+  text-align: center;
+}

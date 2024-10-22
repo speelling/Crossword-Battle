@@ -23,6 +23,10 @@ export const PROFILE_QUERY = gql`
       id
       status
       updatedAt
+      users {
+        id
+        username
+      }
       winner {
         username
         id

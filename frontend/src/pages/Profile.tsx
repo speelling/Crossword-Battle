@@ -3,7 +3,8 @@ import { useQuery } from '@apollo/client';
 import { PROFILE_QUERY } from '../graphql/queries';
 import '../styles/Profile.css';
 import Navbar from '../components/Navbar';
-const Profile: React.FC = () => {  
+
+const Profile: React.FC = () => {
   const { loading, error, data } = useQuery(PROFILE_QUERY);
 
   if (loading) return <p>Loading...</p>;
@@ -11,28 +12,59 @@ const Profile: React.FC = () => {
 
   const { profile } = data;
 
+  const wins = profile.games.filter((game: any) => game.winner?.username === profile.username).length;
+  const losses = profile.games.filter((game: any) => game.winner?.username !== profile.username && game.winner !== null).length;
+
+  const formatDate = (dateTime: Date) => {
+    const date = new Date(dateTime);
+    const formattedDate = date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short', 
+      day: 'numeric',
+    });
+    return formattedDate;
+  };
+
   return (
     <>
-    <Navbar />
-    <div className="profile-container">
-      <h1>Profile</h1>
-      <h2>Username: {profile.username}</h2>
-
-      <h3>Games</h3>
-      <div className="games-list">
-        {profile.games.map((game: any) => (
-          <div key={game.id} className="game-card">
-            <p><strong>Game ID:</strong> {game.id}</p>
-            <p><strong>Status:</strong> {game.status}</p>
-            {game.winner ? (
-              <p><strong>Winner:</strong> {game.winner.username}</p>
-            ) : (
-              <p>No winner yet</p>
-            )}
+      <Navbar />
+      <div className="profile-container">
+        <div className="profile-header">
+          <h1>{profile.username}'s Profile</h1>
+          <div className="win-loss">
+            <div>
+              <p><strong>Wins:</strong> {wins}</p>
+            </div>
+            <div>
+              <p><strong>Losses:</strong> {losses}</p>
+            </div>
           </div>
-        ))}
+        </div>
+
+        <div className="games-section">
+          <h2 className="games-title">Previous Games</h2>
+          <table className="games-table">
+            <thead>
+              <tr>
+                <th>Players</th>
+                <th>Status</th>
+                <th>Winner</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {profile.games.map((game: any) => (
+                <tr key={game.id}>
+                  <td>{game.users.map((user: any) => user.username).join(' vs ')}</td>
+                  <td>{game.status}</td>
+                  <td>{game.winner ? game.winner.username : 'No winner yet'}</td>
+                  <td>{formatDate(game.createdAt)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
     </>
   );
 };

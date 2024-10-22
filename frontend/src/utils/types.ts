@@ -41,7 +41,6 @@ export interface ServerToClientEvents {
   gameStarted: () => void;
   gameEnded: (data: { gameId: string; winner: string }) => void;
   gameExpired: (data: { gameId: string; message: string }) => void;
-  redirectToGame: (data: { gameId: string }) => void; 
   
   error: (data: { message: string }) => void;
 }

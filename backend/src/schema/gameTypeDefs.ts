@@ -13,6 +13,7 @@ type Mutation {
 type Game {
   id: ID!
   gameState: JSON!
+  users: [User!]!
   status: String!
   createdAt: DateTime!
   updatedAt: DateTime!

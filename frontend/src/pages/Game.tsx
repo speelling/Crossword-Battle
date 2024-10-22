@@ -12,9 +12,10 @@ const Game: React.FC = () => {
   const { gameId } = useParams<{ gameId: string }>();
   const [crosswordData, setCrosswordData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [gameStatus, setGameStatus] = useState<'waiting' | 'ongoing' | 'ended'>('waiting');  
+  const [gameStatus, setGameStatus] = useState<'waiting' | 'ongoing' | 'ended'>('waiting');
+  const [timer, setTimer] = useState(0);
   const socketRef = useRef<Socket<ServerToClientEvents, ClientToServerEvents> | null>(null);
-  const navigate = useNavigate();     
+  const navigate = useNavigate();
 
   useEffect(() => {
     const socket = io(SOCKET_SERVER_URL, {
@@ -23,20 +24,21 @@ const Game: React.FC = () => {
     });
 
     socketRef.current = socket;
+    
 
     socket.on('gameState', (gameState: any) => {
       setCrosswordData(gameState);
-      setGameStatus(gameState.status);  
+      setGameStatus(gameState.status);
       setLoading(false);
     });
 
     socket.on('gameStarted', () => {
-      setGameStatus('ongoing'); 
+      setGameStatus('ongoing');
       console.log('The game has started');
     });
 
     socket.on('gameEnded', (data: { gameId: string; winner: string }) => {
-      setGameStatus('ended');  
+      setGameStatus('ended');
       alert(`Game ended! Winner: ${data.winner}`);
     });
 
@@ -45,21 +47,27 @@ const Game: React.FC = () => {
       navigate('/');
     });
 
+    socket.on('timerUpdate', ({ time }) => {
+      setTimer(time);
+    });
+
     socket.on('error', (data: { message: string }) => {
       console.error('Error:', data.message);
     });
 
-    socket.on('redirectToGame', (data: { gameId: string }) => {
-      console.log('Redirecting to active game:', data.gameId);
-      navigate(`/game/${data.gameId}`);
-    });
 
     socket.emit('joinGame', { gameId });
 
     return () => {
-      socket.disconnect(); 
+      socket.disconnect();
     };
   }, [gameId, navigate]);
+
+  const formatTime = (seconds: number) => {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds < 10 ? `0${remainingSeconds}` : remainingSeconds}`;
+  };
 
   const handleMove = (x: number, y: number, value: string) => {
     if (socketRef.current && gameId) {
@@ -76,7 +84,15 @@ const Game: React.FC = () => {
   return (
     <>
       <Navbar />
-      <div>
+      <div className="game-container">
+        <div className="scoreboard">
+          <div className="scoreboard-item">
+          <p>Status: <span className="game-status">{gameStatus === 'waiting' ? 'Waiting for another player...' : gameStatus === 'ongoing' ? 'Ongoing' : 'Game Ended'}</span></p>
+          </div>
+          <div className="scoreboard-item">
+            <p>Timer: <span className="timer-display">{formatTime(timer)}</span></p>
+          </div>
+        </div>
         {loading ? (
           <div>Loading game...</div>
         ) : (

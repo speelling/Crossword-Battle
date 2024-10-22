@@ -22,9 +22,12 @@ const Navbar: React.FC = () => {
     }
   };
 
-
   const handleProfileclick = () => { 
     navigate('/profile');
+  };
+
+  const handleNavigateHome = () => {
+    navigate('/');
   }
 
   if (loading) return <p>Loading...</p>;
@@ -34,7 +37,8 @@ const Navbar: React.FC = () => {
 
   return (
     <nav className="navbar">
-      <div className="navbar-content">
+      <div className="navbar-container">
+        <span className="navbar-title" onClick={handleNavigateHome}>Crossword1v1</span>
         <div className="navbar-buttons">
           {user ? (
             <div style={{ display: 'flex', alignItems: 'center' }}>

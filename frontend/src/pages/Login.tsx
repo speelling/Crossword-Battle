@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useMutation } from '@apollo/client';
 import { LOGIN_MUTATION } from '../graphql/mutations';
 import { ME_QUERY } from '../graphql/queries'; 
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom'; 
 import "../styles/Login.css"
 
 const Login: React.FC = () => {
@@ -56,6 +56,9 @@ const Login: React.FC = () => {
           ))}
         </div>
       )}
+      <div className="link-container">
+        <p>Don't have an account? <Link to="/register">Register</Link></p> {/* Link to Register */}
+      </div>
     </div>
   );
 };

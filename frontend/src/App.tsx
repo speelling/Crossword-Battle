@@ -25,8 +25,11 @@ const App: React.FC = () => {
     <>
       <Navbar/>
       <div className="app-container">
+      
+
         <div className="content-box">
-          <h1>Welcome to Crossword Battle!</h1>
+          
+          <h1>Welcome to Crossword 1v1!</h1>
           <button className="btn" onClick={handleCreateGame} disabled={creating}>
             {creating ? 'Creating...' : 'Create New Game'}
           </button>
