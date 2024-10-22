@@ -107,7 +107,7 @@ const Game: React.FC = () => {
         )}
         {gameStatus === 'waiting' && (
           <div className="waiting-text">
-            <p>Waiting for another player...</p>
+            <p>Waiting...</p>
             <div className="copy-link-box">
               <p>Share this link with another player:</p>
               <input
