@@ -5,7 +5,6 @@ import express from "express";
 import http from "http";
 import cors from "cors";
 import session from "express-session";
-import connectRedis from "connect-redis";
 import Redis, { Redis as RedisType } from "ioredis";
 import { PrismaClient } from "@prisma/client";
 import { UserResolver } from "./resolvers/UserResolver";
@@ -51,8 +50,8 @@ export interface MyContext {
 const context: MyContext = {
   prisma,
   redis,
-  req: {} as any, // Will be populated dynamically in each request
-  res: {} as any, // Will be populated dynamically in each request
+  req: {} as any, 
+  res: {} as any, 
 };
 
 export const sessionMiddleware = session({

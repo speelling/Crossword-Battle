@@ -1,4 +1,3 @@
-// src/components/Crossword.tsx
 import React, { useState } from 'react';
 import { CrosswordProps } from '../utils/types';
 import '../styles/Crossword.css';
@@ -11,20 +10,20 @@ const Crossword: React.FC<CrosswordProps> = ({ puzzle, clues, dim, onMove }) => 
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement>,
-    y: number,
-    x: number
+    x: number, 
+    y: number  
   ) => {
     const value = e.target.value.toUpperCase();
     if (value.length > 1) return;
 
     const newGrid = [...userGrid];
-    newGrid[y][x] = value;
+    newGrid[x][y] = value;
     setUserGrid(newGrid);
 
     onMove(x, y, value);
   };
 
-  const handleCellClick = (y: number, x: number) => {
+  const handleCellClick = (x: number, y: number) => {
     const cell = puzzle.find(
       (c: any) => c.position.x === x && c.position.y === y
     );
@@ -36,11 +35,14 @@ const Crossword: React.FC<CrosswordProps> = ({ puzzle, clues, dim, onMove }) => 
     const newClue = clues.find((clue: any) => clue.clueId === currentClue);
 
     if (newClue) {
-      setSelectedClue({ clueId: newClue.clueId, direction: newClue.direction });
+      setSelectedClue({
+        clueId: newClue.clueId,
+        direction: newClue.direction,
+      });
     }
   };
 
-  const isCellHighlighted = (y: number, x: number) => {
+  const isCellHighlighted = (x: number, y: number) => {
     if (!selectedClue) return false;
 
     const activeClue = clues.find(
@@ -48,52 +50,56 @@ const Crossword: React.FC<CrosswordProps> = ({ puzzle, clues, dim, onMove }) => 
     );
     if (!activeClue) return false;
 
-    const highlighted = activeClue.cells.some(([cellX, cellY]) => cellX === x && cellY === y);
-
-    return highlighted;
+    return activeClue.cells.some(
+      ([cellX, cellY]) => cellX === x && cellY === y
+    );
   };
 
   const renderGrid = () => {
     let grid = [];
 
-    for (let y = 0; y < dim.rows; y++) {
+    for (let x = 0; x < dim.rows; x++) {
       let row = [];
 
-      for (let x = 0; x < dim.cols; x++) {
+      for (let y = 0; y < dim.cols; y++) {
         const cell = puzzle.find(
           (c: any) => c.position.x === x && c.position.y === y
         );
 
         if (cell) {
           if (cell.isBlack) {
-            row.push(<td key={`${y}-${x}`} className="black-cell"></td>);
+            row.push(<td key={`${x}-${y}`} className="black-cell"></td>);
           } else {
-            const isHighlighted = isCellHighlighted(y, x);
+            const isHighlighted = isCellHighlighted(x, y);
             const cellClass = isHighlighted ? "cell highlighted" : "cell";
 
             row.push(
               <td
-                key={`${y}-${x}`}
+                key={`${x}-${y}`}
                 className={cellClass}
-                onClick={() => handleCellClick(y, x)}
+                onClick={() => handleCellClick(x, y)}
               >
                 <input
                   type="text"
                   maxLength={1}
-                  value={userGrid[y][x]}
-                  onChange={(e) => handleInputChange(e, y, x)}
+                  value={userGrid[x][y]}
+                  onChange={(e) => handleInputChange(e, x, y)}
                 />
               </td>
             );
           }
         } else {
-          row.push(<td key={`${y}-${x}`} className="cell"></td>);
+          row.push(<td key={`${x}-${y}`} className="cell"></td>);
         }
       }
-      grid.push(<tr key={y}>{row}</tr>);
+      grid.push(<tr key={x}>{row}</tr>);
     }
 
     return grid;
+  };
+
+  const handleClueClick = (clueId: number, direction: string) => {
+    setSelectedClue({ clueId, direction });
   };
 
   const renderClues = (direction: 'across' | 'down') => {
@@ -101,26 +107,45 @@ const Crossword: React.FC<CrosswordProps> = ({ puzzle, clues, dim, onMove }) => 
       .filter((clue: any) => clue.direction === direction)
       .map((clue: any) => (
         <li key={clue.clueId}>
-          {clue.clueId + 1} {clue.text}
+          <button onClick={() => handleClueClick(clue.clueId, direction)}>
+            {clue.clueId + 1} {clue.text}
+          </button>
         </li>
       ));
   };
 
-  return (
-    <div className="crossword-container">
-      <table className="crossword-grid">
-        <tbody>{renderGrid()}</tbody>
-      </table>
-
-      <div className="clues">
-        <div className="across">
-          <h3>Across</h3>
-          <ul>{renderClues('across')}</ul>
+  const renderSelectedClueText = () => {
+    if (!selectedClue) return null;
+    
+    const clue = clues.find((clue: any) => clue.clueId === selectedClue.clueId);
+    if (clue) {
+      return (
+        <div className="selected-clue">
+          <strong>  {selectedClue.clueId}{selectedClue.direction[0]}</strong> {clue.text}
         </div>
+      );
+    }
+    return null;
+  };
 
-        <div className="down">
-          <h3>Down</h3>
-          <ul>{renderClues('down')}</ul>
+  return (
+    <div className="crossword-wrapper">
+      {renderSelectedClueText()}
+
+      <div className="crossword-grid-container">
+        <table className="crossword-grid">
+          <tbody>{renderGrid()}</tbody>
+        </table>
+
+        <div className="clue-section">
+          <div className="across">
+            <h3>Across</h3>
+            <ul>{renderClues('across')}</ul>
+          </div>
+          <div className="down">
+            <h3>Down</h3>
+            <ul>{renderClues('down')}</ul>
+          </div>
         </div>
       </div>
     </div>

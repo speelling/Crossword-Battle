@@ -24,14 +24,26 @@ export function setupSocketIO(
   const subscriber = context.redis.duplicate();
   subscriber.psubscribe('__keyevent@*__:expired');
 
-  subscriber.on('pmessage', (pattern, channel, expiredKey) => {
+  subscriber.on('pmessage', async (pattern, channel, expiredKey) => {
     if (expiredKey.startsWith('game:')) {
       const gameId = expiredKey.split(':')[1];
+      
       io.to(`game:${gameId}`).emit('gameExpired', {
         gameId,
         message: 'The game has expired due to inactivity.',
       });
+
+      const gameStateJson = await context.redis.get(expiredKey);
+    if (gameStateJson) {
+      const gameState = JSON.parse(gameStateJson);
+    
+
+      await Promise.all(
+        gameState.players.map((playerId: string) => context.redis.del(`user:${playerId}:activeGame`))
+      );
     }
+    }
+   
   });
 
   io.on('connection', (socket: Socket<ClientToServerEvents, ServerToClientEvents>) => {
@@ -53,6 +65,14 @@ export function setupSocketIO(
 
     socket.on('joinGame', async ({ gameId }) => {
       try {
+        const userGameKey = `user:${userId}:activeGame`;
+        const activeGameId = await context.redis.get(userGameKey);
+
+        if (activeGameId && activeGameId !== gameId) {
+          socket.emit('redirectToGame', { gameId: activeGameId });
+          return;
+        }
+
         const gameKey = `game:${gameId}`;
         const gameStateJson = await context.redis.get(gameKey);
         if (!gameStateJson) {
@@ -62,7 +82,6 @@ export function setupSocketIO(
 
         const gameState = JSON.parse(gameStateJson);
 
-
         if (!gameState.players.includes(userId)) {
           if (gameState.players.length >= 2) {
             socket.emit('error', { message: 'Game is full' });
@@ -70,7 +89,7 @@ export function setupSocketIO(
           }
 
           gameState.players.push(userId);
-          await context.redis.set(gameKey, JSON.stringify(gameState),'KEEPTTL');
+          await context.redis.set(gameKey, JSON.stringify(gameState), 'KEEPTTL');
         }
 
         socket.join(`game:${gameId}`);
@@ -84,11 +103,10 @@ export function setupSocketIO(
           }));
 
           gameState.playerStates[userId] = { puzzle: playerPuzzle };
-
-          await context.redis.set(gameKey, JSON.stringify(gameState),'KEEPTTL');
+          await context.redis.set(gameKey, JSON.stringify(gameState), 'KEEPTTL');
         }
 
-        
+        await context.redis.set(userGameKey, gameId);
 
         const clientGameState = {
           gameId: gameState.gameId,
@@ -102,8 +120,7 @@ export function setupSocketIO(
 
         if (gameState.players.length === 2 && gameState.status === 'waiting') {
           gameState.status = 'ongoing';
-          await context.redis.set(gameKey, JSON.stringify(gameState),'KEEPTTL');
-
+          await context.redis.set(gameKey, JSON.stringify(gameState), 'KEEPTTL');
           await context.redis.expire(gameKey, 1800); 
 
           io.to(`game:${gameId}`).emit('gameStarted', { gameId });
@@ -149,14 +166,13 @@ export function setupSocketIO(
         if (cellIndex !== -1) {
           playerPuzzle[cellIndex].value = move.value;
 
-          await context.redis.set(gameKey, JSON.stringify(gameState),"KEEPTTL");
-
+          await context.redis.set(gameKey, JSON.stringify(gameState), "KEEPTTL");
 
           const isComplete = checkCrosswordCompletion(gameState, userId);
 
           if (isComplete) {
             gameState.status = 'ended';
-            await context.redis.set(gameKey, JSON.stringify(gameState),"KEEPTTL");
+            await context.redis.set(gameKey, JSON.stringify(gameState), "KEEPTTL");
 
             io.to(`game:${gameId}`).emit('gameEnded', {
               gameId,
@@ -180,6 +196,11 @@ export function setupSocketIO(
                 },
               },
             });
+
+            await Promise.all(
+              gameState.players.map((playerId: string) => context.redis.del(`user:${playerId}:activeGame`))
+            );
+            
 
             await context.redis.del(gameKey);
           } else {

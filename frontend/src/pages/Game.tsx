@@ -4,7 +4,7 @@ import { io, Socket } from 'socket.io-client';
 import Crossword from '../components/Crossword';
 import Navbar from '../components/Navbar';
 import { ClientToServerEvents, Move, ServerToClientEvents } from '../utils/types';
-import "../styles/Game.css"
+import "../styles/Game.css";
 
 const SOCKET_SERVER_URL = 'http://localhost:4000';
 
@@ -15,7 +15,6 @@ const Game: React.FC = () => {
   const [gameStatus, setGameStatus] = useState<'waiting' | 'ongoing' | 'ended'>('waiting');  
   const socketRef = useRef<Socket<ServerToClientEvents, ClientToServerEvents> | null>(null);
   const navigate = useNavigate();     
-
 
   useEffect(() => {
     const socket = io(SOCKET_SERVER_URL, {
@@ -50,6 +49,11 @@ const Game: React.FC = () => {
       console.error('Error:', data.message);
     });
 
+    socket.on('redirectToGame', (data: { gameId: string }) => {
+      console.log('Redirecting to active game:', data.gameId);
+      navigate(`/game/${data.gameId}`);
+    });
+
     socket.emit('joinGame', { gameId });
 
     return () => {
@@ -62,6 +66,11 @@ const Game: React.FC = () => {
       const move: Move = { position: { x, y }, value };
       socketRef.current.emit('makeMove', { gameId, move });
     }
+  };
+
+  const copyLinkToClipboard = () => {
+    const gameLink = window.location.href;
+    navigator.clipboard.writeText(gameLink);
   };
 
   return (
@@ -80,7 +89,23 @@ const Game: React.FC = () => {
             />
           </div>
         )}
-        {gameStatus === 'waiting' && <div className="waiting-text">Waiting for another player...</div>}
+        {gameStatus === 'waiting' && (
+          <div className="waiting-text">
+            <p>Waiting for another player...</p>
+            <div className="copy-link-box">
+              <p>Share this link with another player:</p>
+              <input
+                type="text"
+                value={window.location.href}
+                readOnly
+                className="game-link-input"
+              />
+              <button onClick={copyLinkToClipboard} className="copy-button">
+                Copy Link
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

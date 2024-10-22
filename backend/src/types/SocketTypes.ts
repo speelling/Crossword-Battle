@@ -12,6 +12,7 @@ export interface ClientToServerEvents {
     gameEnded: (data: { gameId: string; winner: string }) => void;
     gameExpired: (data: { gameId: string; message: string }) => void;
     updatePlayerState: (data: { gameId: string; puzzle: Cell[] }) => void;
+    redirectToGame: (data: { gameId: string }) => void;  
     error: (data: { message: string }) => void;
   }
   

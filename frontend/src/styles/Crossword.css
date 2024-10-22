@@ -1,83 +1,89 @@
-.crossword-container {
-    display: flex;
-    flex-direction: row;
-    padding-top: 100px;
-    justify-content: center;
-  }
-  
-  .crossword-grid {
-    border-collapse: collapse;
-    margin-bottom: 20px;
-  }
-  
+.crossword-wrapper {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 20px;
+  padding: 40px;
+  justify-items: center;
+  align-items: center;
+}
 
-  .clues {
-    display: flex;
-    flex-direction: row; 
-    justify-content: space-between; 
-    height: auto; 
-    }
-  
-  .across, .down {
-    margin: 0 20px;
-  }
+.selected-clue {
+  font-size: 1.5em;
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-align: center;
+}
 
-  .across li, .down li {
-    padding: 4px 0;
-  }
+.crossword-grid-container {
+  display: grid;
+  grid-template-columns: 1fr 300px; 
+  grid-gap: 20px;
+  justify-items: center;
+  align-items: start;
+}
 
-  
-  ul {
-    list-style-type: none;
-    padding: 0;
-  }
-  
-  
-  .crossword-grid td {
-    width: 5em;
-    height: 5em;
-    text-align: center;
-    border: 1px solid black;
-    font-size: 20px;
-    font-weight: bold;
-    position: relative; 
-  }
-  
-  .crossword-grid input {
-    width: 100%;
-    height: 100%;
-    text-align: center;
-    font-size: 60px;
-    border: none;
-    outline: none;
-  }
-  
-  .number {
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    font-size: 14px;
-    color: black;
-    font-weight: normal;
-  }
-  
-  .black-cell {
-    background-color: black;
-  }
-  
+.crossword-grid {
+  border-collapse: collapse;
+}
 
-  .cell {
-    width: 40px;
-    height: 40px;
-    text-align: center;
-  }
-  
+.clue-section {
+  display: grid;
+  grid-template-columns: 2fr 2fr;
+  gap: 20px;
+  align-items: start;
+}
 
-  
-  .highlighted {
-    background-color: rgb(0, 191, 255);
-  }
+.across, .down {
+  max-height: 400px;
+  overflow-y: auto;
+}
 
-  .highlighted input {
-    background-color: rgb(0, 191, 255);
-  }
+.across ul, .down ul {
+  list-style: none;
+  padding: 0;
+}
+
+.across li, .down li {
+  padding: 4px 0;
+}
+
+.across h3, .down h3 {
+  margin-bottom: 10px;
+}
+
+.crossword-grid td {
+  width: 5em;
+  height: 5em;
+  text-align: center;
+  border: 1px solid black;
+  position: relative;
+}
+
+.crossword-grid input {
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  font-size: 2em;
+  font-weight: bold;
+  border: none;
+  outline: none;
+}
+
+.number {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  font-size: 0.75em;
+  color: black;
+}
+
+.black-cell {
+  background-color: black;
+}
+
+.cell.highlighted {
+  background-color: rgb(0, 191, 255);
+}
+.cell.highlighted input {
+  background-color: rgb(0, 191, 255);
+}
