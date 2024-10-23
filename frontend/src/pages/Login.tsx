@@ -65,7 +65,7 @@ useEffect(() => {
         </div>
       )}
       <div className="link-container">
-        <p>Don't have an account? <Link to="/register">Register</Link></p> {/* Link to Register */}
+        <p>Don't have an account? <Link to="/register">Register</Link></p> 
       </div>
     </div>
   );

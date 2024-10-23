@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useMutation, useQuery } from "@apollo/client";
 import { REGISTER_MUTATION } from "../graphql/mutations";
 import { ME_QUERY } from "../graphql/queries";
-import { useNavigate, Link } from "react-router-dom"; // Import Link for navigation
+import { useNavigate, Link } from "react-router-dom"; 
 import "../styles/Register.css";
 
 const Register: React.FC = () => {
