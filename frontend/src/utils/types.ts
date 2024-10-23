@@ -1,11 +1,11 @@
 export interface Cell {
-  answer: string;
-  clues: number[];
   isBlack: boolean;
   position: {
     x: number;
     y: number;
   };
+  clues: number[]; 
+  value?: string; 
 }
 
 export interface Clue {
@@ -41,6 +41,6 @@ export interface ServerToClientEvents {
   gameStarted: () => void;
   gameEnded: (data: { gameId: string; winner: string }) => void;
   gameExpired: (data: { gameId: string; message: string }) => void;
-  
+  updatePlayerState: (data: { gameId: string; puzzle: Cell[] }) => void;
   error: (data: { message: string }) => void;
 }
