@@ -23,7 +23,7 @@ export const GameResolver = {
             orderBy: {
               updatedAt: 'desc', 
             },
-            take: 20, 
+            take: 15, 
           },
         },
       });

@@ -175,9 +175,14 @@ export function setupSocketIO(
             gameState.status = 'ended';
             await context.redis.set(gameKey, JSON.stringify(gameState),"KEEPTTL");
 
+            const winner = await context.prisma.user.findUnique({
+              where: { id: userId },
+              select: { username: true },
+            });
+
             io.to(`game:${gameId}`).emit('gameEnded', {
               gameId,
-              winner: userId,
+              winner: winner?.username!,
             });
 
             await context.prisma.game.create({
