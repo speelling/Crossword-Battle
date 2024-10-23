@@ -16,7 +16,7 @@
 
 .crossword-grid-container {
   display: grid;
-  grid-template-columns: 1fr 1fr ; 
+  grid-template-columns: 1fr 1fr;
   grid-gap: 20px;
   justify-items: center;
   align-items: start;
@@ -35,17 +35,20 @@
   align-items: start;
 }
 
-.across, .down {
+.across,
+.down {
   max-height: 400px;
   overflow-y: auto;
 }
 
-.across ul, .down ul {
+.across ul,
+.down ul {
   list-style: none;
   padding: 0;
 }
 
-.across li, .down li {
+.across li,
+.down li {
   padding: 4px 0;
 }
 
@@ -64,7 +67,8 @@
   color: darkblue;
 }
 
-.across h3, .down h3 {
+.across h3,
+.down h3 {
   margin-bottom: 10px;
 }
 
@@ -90,7 +94,7 @@
   position: absolute;
   top: 2px;
   left: 2px;
-  font-size: 0.75em;
+  font-size: 1em;
   color: black;
 }
 
@@ -98,9 +102,22 @@
   background-color: black;
 }
 
+.cell {
+  background-color: white;
+}
+
 .cell.highlighted {
   background-color: rgb(0, 191, 255);
 }
+
 .cell.highlighted input {
   background-color: rgb(0, 191, 255);
+}
+
+.cell.current-cell {
+  background-color: rgb(255, 208, 0);
+}
+
+.cell.current-cell input {
+  background-color: rgb(255, 208, 0);
 }
