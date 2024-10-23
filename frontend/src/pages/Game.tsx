@@ -3,8 +3,22 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { io, Socket } from 'socket.io-client';
 import Crossword from '../components/Crossword';
 import Navbar from '../components/Navbar';
-import { ClientToServerEvents, Move, ServerToClientEvents } from '../utils/types';
 import "../styles/Game.css";
+import { ClientToServerEvents, Move, ServerToClientEvents } from '../utils/types';
+
+const GameEndedPopup: React.FC<{ winner: string; show: boolean; onClose: () => void }> = ({ winner, show, onClose }) => {
+  if (!show) return null;
+
+  return (
+    <div className="modal-overlay">
+      <div className="modal-content">
+        <h2>Game Ended</h2>
+        <p>Winner: {winner}</p>
+        <button onClick={onClose} className="close-button">Close</button>
+      </div>
+    </div>
+  );
+};
 
 const SOCKET_SERVER_URL = 'http://localhost:4000';
 
@@ -14,6 +28,8 @@ const Game: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [gameStatus, setGameStatus] = useState<'waiting' | 'ongoing' | 'ended'>('waiting');
   const [timer, setTimer] = useState(0);
+  const [winner, setWinner] = useState<string | null>(null);
+  const [showPopup, setShowPopup] = useState(false);
   const socketRef = useRef<Socket<ServerToClientEvents, ClientToServerEvents> | null>(null);
   const navigate = useNavigate();
 
@@ -24,12 +40,22 @@ const Game: React.FC = () => {
     });
 
     socketRef.current = socket;
-    
 
     socket.on('gameState', (gameState: any) => {
-      setCrosswordData(gameState);
-      setGameStatus(gameState.status);
-      setLoading(false);
+      if (!gameState) {
+        setLoading(false);
+      } else {
+        setCrosswordData(gameState);
+        setGameStatus(gameState.status);
+        setLoading(false);
+      }
+    });
+
+    socket.on('updatePlayerState', (data: { gameId: string; puzzle: any }) => {
+      setCrosswordData((prevData: any) => ({
+        ...prevData,
+        puzzle: data.puzzle,
+      }));
     });
 
     socket.on('gameStarted', () => {
@@ -39,11 +65,14 @@ const Game: React.FC = () => {
 
     socket.on('gameEnded', (data: { gameId: string; winner: string }) => {
       setGameStatus('ended');
-      alert(`Game ended! Winner: ${data.winner}`);
+      setWinner(data.winner);
+      setShowPopup(true);
+      socket.disconnect();
     });
 
     socket.on('gameExpired', (data: { gameId: string; message: string }) => {
       alert(data.message);
+      socket.disconnect();
       navigate('/');
     });
 
@@ -54,7 +83,6 @@ const Game: React.FC = () => {
     socket.on('error', (data: { message: string }) => {
       console.error('Error:', data.message);
     });
-
 
     socket.emit('joinGame', { gameId });
 
@@ -81,21 +109,27 @@ const Game: React.FC = () => {
     navigator.clipboard.writeText(gameLink);
   };
 
+  const handleClosePopup = () => {
+    setShowPopup(false);
+  };
+
   return (
     <>
       <Navbar />
-      <div className="game-container">
-        <div className="scoreboard">
-          <div className="scoreboard-item">
-          <p>Status: <span className="game-status">{gameStatus === 'waiting' ? 'Waiting for another player...' : gameStatus === 'ongoing' ? 'Ongoing' : 'Game Ended'}</span></p>
-          </div>
-          <div className="scoreboard-item">
-            <p>Timer: <span className="timer-display">{formatTime(timer)}</span></p>
-          </div>
+      {loading ? (
+        <div className="game-not-found">
+          <p>Game not found</p>
         </div>
-        {loading ? (
-          <div>Loading game...</div>
-        ) : (
+      ) : (
+        <div className="game-container">
+          <div className="scoreboard">
+            <div className="scoreboard-item">
+              <p>Status: <span className="game-status">{gameStatus === 'waiting' ? 'Waiting for another player...' : gameStatus === 'ongoing' ? 'Ongoing' : 'Game Ended'}</span></p>
+            </div>
+            <div className="scoreboard-item">
+              <p>Timer: <span className="timer-display">{formatTime(timer)}</span></p>
+            </div>
+          </div>
           <div className={gameStatus === 'waiting' ? 'blurred' : ''}>
             <Crossword
               puzzle={crosswordData.puzzle}
@@ -104,25 +138,26 @@ const Game: React.FC = () => {
               onMove={handleMove}
             />
           </div>
-        )}
-        {gameStatus === 'waiting' && (
-          <div className="waiting-text">
-            <p>Waiting...</p>
-            <div className="copy-link-box">
-              <p>Share this link with another player:</p>
-              <input
-                type="text"
-                value={window.location.href}
-                readOnly
-                className="game-link-input"
-              />
-              <button onClick={copyLinkToClipboard} className="copy-button">
-                Copy Link
-              </button>
+          {gameStatus === 'waiting' && (
+            <div className="waiting-text">
+              <p>Waiting...</p>
+              <div className="copy-link-box">
+                <p>Share this link with another player:</p>
+                <input
+                  type="text"
+                  value={window.location.href}
+                  readOnly
+                  className="game-link-input"
+                />
+                <button onClick={copyLinkToClipboard} className="copy-button">
+                  Copy Link
+                </button>
+              </div>
             </div>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
+      <GameEndedPopup winner={winner || ''} show={showPopup} onClose={handleClosePopup} />
     </>
   );
 };

@@ -1,44 +1,198 @@
-import React, { useState } from 'react';
-import { CrosswordProps } from '../utils/types';
+import React, { useEffect, useState } from 'react';
+import { CrosswordProps, Cell } from '../utils/types';
 import '../styles/Crossword.css';
 
 const Crossword: React.FC<CrosswordProps> = ({ puzzle, clues, dim, onMove }) => {
   const [userGrid, setUserGrid] = useState<string[][]>(
     Array(dim.rows).fill("").map(() => Array(dim.cols).fill(""))
   );
-  const [selectedClue, setSelectedClue] = useState<{ clueId: number; direction: string } | null>(null);
+
+
+  useEffect(() => {
+    const grid = Array(dim.rows).fill("").map(() => Array(dim.cols).fill(""));
+
+    puzzle.forEach((cell: Cell) => {
+      if (!cell.isBlack) {
+        const x = cell.position.x;
+        const y = cell.position.y;
+        grid[x][y] = cell.value || "";
+      }
+    });
+
+    setUserGrid(grid);
+  }, [puzzle, dim.rows, dim.cols]);
+  const [selectedClue, setSelectedClue] = useState<{ clueId: number; direction: string }>({
+    clueId: 5, 
+    direction: 'across'
+  });
+  const [selectedCell, setSelectedCell] = useState<{ x: number; y: number } | null>(null);
+
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    x: number,
+    y: number
+  ) => {
+    let nextX = x;
+    let nextY = y;
+
+    switch (e.key) {
+      case 'ArrowUp':
+        nextX = x - 1;
+        break;
+      case 'ArrowDown':
+        nextX = x + 1;
+        break;
+      case 'ArrowLeft':
+        nextY = y - 1;
+        break;
+      case 'ArrowRight':
+        nextY = y + 1;
+        break;
+      case 'Backspace':
+        e.preventDefault();
+        const newGrid = [...userGrid];
+        newGrid[x][y] = '';
+        setUserGrid(newGrid);
+        onMove(x, y, '');
+
+        handleBackspace(x, y);
+        return;
+      default:
+        return; 
+    }
+
+    e.preventDefault();
+
+    if (nextX < 0 || nextX >= dim.rows || nextY < 0 || nextY >= dim.cols) {
+      return;
+    }
+
+    const cell = puzzle.find(
+      (c: Cell) => c.position.x === nextX && c.position.y === nextY
+    );
+    if (!cell || cell.isBlack) {
+      return; 
+    }
+
+    const nextInput = document.querySelector(
+      `input[data-position-x="${nextX}"][data-position-y="${nextY}"]`
+    ) as HTMLInputElement;
+
+    if (nextInput) {
+      nextInput.focus();
+      nextInput.select(); 
+      setSelectedCell({ x: nextX, y: nextY });
+
+      const clueId = cell.clues.find((clueId) => {
+        const clue = clues.find((clue) => clue.clueId === clueId);
+        return clue && clue.direction === selectedClue.direction;
+      });
+
+      if (clueId !== undefined) {
+        setSelectedClue({ clueId, direction: selectedClue.direction });
+      }
+    }
+  };
+
+  const handleBackspace = (x: number, y: number) => {
+    const clue = clues.find((clue) => clue.clueId === selectedClue.clueId);
+
+    if (clue) {
+      const cellIndex = clue.cells.findIndex(
+        ([cellX, cellY]) => cellX === x && cellY === y
+      );
+
+      if (cellIndex > 0) {
+        const [prevX, prevY] = clue.cells[cellIndex - 1];
+
+        const prevInput = document.querySelector(
+          `input[data-position-x="${prevX}"][data-position-y="${prevY}"]`
+        ) as HTMLInputElement;
+
+        if (prevInput) {
+          prevInput.focus();
+          prevInput.select(); 
+          setSelectedCell({ x: prevX, y: prevY });
+        }
+      }
+    }
+  };
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement>,
-    x: number, 
-    y: number  
+    x: number,
+    y: number
   ) => {
     const value = e.target.value.toUpperCase();
+
     if (value.length > 1) return;
 
     const newGrid = [...userGrid];
-    newGrid[x][y] = value;
+    newGrid[x][y] = value; 
     setUserGrid(newGrid);
 
-    onMove(x, y, value);
+    onMove(x, y, value); 
+
+    const clue = clues.find((clue) => clue.clueId === selectedClue.clueId);
+
+    if (clue) {
+      const cellIndex = clue.cells.findIndex(
+        ([cellX, cellY]) => cellX === x && cellY === y
+      );
+
+      if (cellIndex >= 0 && cellIndex < clue.cells.length - 1) {
+        const [nextX, nextY] = clue.cells[cellIndex + 1];
+
+        const nextInput = document.querySelector(
+          `input[data-position-x="${nextX}"][data-position-y="${nextY}"]`
+        ) as HTMLInputElement;
+
+        if (nextInput) {
+          nextInput.focus();
+          nextInput.select(); 
+          setSelectedCell({ x: nextX, y: nextY });
+        }
+      } else {
+      }
+    }
   };
 
   const handleCellClick = (x: number, y: number) => {
     const cell = puzzle.find(
-      (c: any) => c.position.x === x && c.position.y === y
+      (c: Cell) => c.position.x === x && c.position.y === y
     );
     if (!cell || cell.isBlack) return;
 
-    const currentClue =
-      selectedClue?.clueId === cell.clues[0] ? cell.clues[1] : cell.clues[0];
+    if (selectedCell && selectedCell.x === x && selectedCell.y === y) {
+      const newDirection = selectedClue.direction === 'across' ? 'down' : 'across';
 
-    const newClue = clues.find((clue: any) => clue.clueId === currentClue);
-
-    if (newClue) {
-      setSelectedClue({
-        clueId: newClue.clueId,
-        direction: newClue.direction,
+      const clueId = cell.clues.find((clueId) => {
+        const clue = clues.find((clue) => clue.clueId === clueId);
+        return clue && clue.direction === newDirection;
       });
+
+      if (clueId !== undefined) {
+        setSelectedClue({ clueId, direction: newDirection });
+        setSelectedCell({ x, y });
+      }
+    } else {
+      const clueId = cell.clues.find((clueId) => {
+        const clue = clues.find((clue) => clue.clueId === clueId);
+        return clue && clue.direction === selectedClue.direction;
+      });
+
+      if (clueId !== undefined) {
+        setSelectedClue({ clueId, direction: selectedClue.direction });
+      } else {
+        const firstClueId = cell.clues[0]; 
+        const firstClue = clues.find((clue) => clue.clueId === firstClueId);
+
+        if (firstClue) {
+          setSelectedClue({ clueId: firstClue.clueId, direction: firstClue.direction });
+        }
+      }
+
+      setSelectedCell({ x, y });
     }
   };
 
@@ -46,7 +200,7 @@ const Crossword: React.FC<CrosswordProps> = ({ puzzle, clues, dim, onMove }) => 
     if (!selectedClue) return false;
 
     const activeClue = clues.find(
-      (clue: any) => clue.clueId === selectedClue.clueId
+      (clue) => clue.clueId === selectedClue.clueId
     );
     if (!activeClue) return false;
 
@@ -63,7 +217,7 @@ const Crossword: React.FC<CrosswordProps> = ({ puzzle, clues, dim, onMove }) => 
 
       for (let y = 0; y < dim.cols; y++) {
         const cell = puzzle.find(
-          (c: any) => c.position.x === x && c.position.y === y
+          (c: Cell) => c.position.x === x && c.position.y === y
         );
 
         if (cell) {
@@ -71,7 +225,14 @@ const Crossword: React.FC<CrosswordProps> = ({ puzzle, clues, dim, onMove }) => 
             row.push(<td key={`${x}-${y}`} className="black-cell"></td>);
           } else {
             const isHighlighted = isCellHighlighted(x, y);
-            const cellClass = isHighlighted ? "cell highlighted" : "cell";
+            const isCurrentCell = selectedCell && selectedCell.x === x && selectedCell.y === y;
+
+            let cellClass = 'cell';
+            if (isCurrentCell) {
+              cellClass += ' current-cell';
+            } else if (isHighlighted) {
+              cellClass += ' highlighted';
+            }
 
             row.push(
               <td
@@ -79,11 +240,17 @@ const Crossword: React.FC<CrosswordProps> = ({ puzzle, clues, dim, onMove }) => 
                 className={cellClass}
                 onClick={() => handleCellClick(x, y)}
               >
+                {cell.clues[0] !== undefined && (
+                  <div className="number">{cell.clues[0]}</div>
+                )}
                 <input
                   type="text"
                   maxLength={1}
                   value={userGrid[x][y]}
                   onChange={(e) => handleInputChange(e, x, y)}
+                  onKeyDown={(e) => handleKeyDown(e, x, y)}
+                  data-position-x={x}
+                  data-position-y={y}
                 />
               </td>
             );
@@ -100,12 +267,25 @@ const Crossword: React.FC<CrosswordProps> = ({ puzzle, clues, dim, onMove }) => 
 
   const handleClueClick = (clueId: number, direction: string) => {
     setSelectedClue({ clueId, direction });
+    const clue = clues.find((clue) => clue.clueId === clueId);
+    if (clue && clue.cells.length > 0) {
+      const [x, y] = clue.cells[0];
+      setSelectedCell({ x, y });
+      const input = document.querySelector(
+        `input[data-position-x="${x}"][data-position-y="${y}"]`
+      ) as HTMLInputElement;
+
+      if (input) {
+        input.focus();
+        input.select();
+      }
+    }
   };
 
   const renderClues = (direction: 'across' | 'down') => {
     return clues
-      .filter((clue: any) => clue.direction === direction)
-      .map((clue: any) => (
+      .filter((clue) => clue.direction === direction)
+      .map((clue) => (
         <li key={clue.clueId}>
           <span
             className="clue-text"
@@ -119,12 +299,16 @@ const Crossword: React.FC<CrosswordProps> = ({ puzzle, clues, dim, onMove }) => 
 
   const renderSelectedClueText = () => {
     if (!selectedClue) return null;
-    
-    const clue = clues.find((clue: any) => clue.clueId === selectedClue.clueId);
+
+    const clue = clues.find((clue) => clue.clueId === selectedClue.clueId);
     if (clue) {
       return (
         <div className="selected-clue">
-          <strong>  {selectedClue.clueId}{selectedClue.direction[0]}</strong> {clue.text}
+          <strong>
+            {selectedClue.clueId + 1}
+            {selectedClue.direction[0].toUpperCase()}
+          </strong>{' '}
+          {clue.text}
         </div>
       );
     }
